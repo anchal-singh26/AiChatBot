@@ -11,6 +11,8 @@ import bin_icon from "./bin_icon.svg";
 
 import diamond_icon from "./diamond_icon.svg";
 import gallery_icon from "./gallery_icon.svg";
+import logoutIcon from "../assets/logout.jpg";
+
 
 
 import profile_icon from "./user_icon.svg"; 
@@ -114,6 +116,7 @@ export const assets = {
   diamond_icon,
   gallery_icon,
   profile_icon,
+  logoutIcon,
   sun_icon,
   moon_icon,
   ai_image1,

@@ -2,44 +2,59 @@ import React, { useEffect, useState, useRef } from 'react'
 import { useAppContext } from '../context/AppContext'
 import { assets } from '../assets/assets'
 import Message from './Message'
+import toast from 'react-hot-toast'
 
 const ChatBox = () => {
-  const { selectedChat, theme } = useAppContext()
+  const { selectedChat, theme, user, axios, token,setUser } = useAppContext()
   const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(false)
   const [prompt, setPrompt] = useState('')
   const [mode, setMode] = useState('text')
   const [isPublished, setIsPublished] = useState(false)
-  const [attachedFile, setAttachedFile] = useState(null) // ✅ File support
+  const [attachedFile, setAttachedFile] = useState(null) 
+  const timeoutRef = useRef(null) 
+  
+   const onSubmit = async (e) => {
+    try {
+      e.preventDefault()
+      if (!user) return toast('Login to Send message')
+      setLoading(true)
+      const promptCopy = prompt
+      setPrompt('')
+      setMessages(prev => [...prev, { role: 'user', content: prompt, timestamp: Date.now(), isImage: false }])
 
-  const timeoutRef = useRef(null) // ✅ used for stop generation
+      const { data } = await axios.post(
+        `/api/message/${mode}`,
+        { chatId: selectedChat._id, prompt, isPublished },
+        { headers: { Authorization: token } }
+      )
 
-  const onSubmit = async (e) => {
-    e.preventDefault()
-    if (!prompt.trim() && !attachedFile) return
-
-    // User message
-    const newMessage = {
-      role: "user",
-      content: prompt || (attachedFile ? `📎 ${attachedFile.name}` : ""),
-      timestamp: new Date(),
-      file: attachedFile || null
+      if (data.success) {
+        setMessages(prev => [...prev, data.reply])
+      } else {
+        toast.error(data.message)
+        setPrompt(promptCopy)
+      }
+    } catch (error) {
+      toast.error(error.message)
+    } finally {
+      setPrompt('')
+      setLoading(false)
     }
 
-    setMessages([...messages, newMessage])
-    setPrompt("")
-    setAttachedFile(null) // clear after sending
+    
+    setAttachedFile(null) 
     setLoading(true)
 
-    // Simulate AI response (dummy)
     timeoutRef.current = setTimeout(() => {
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content: mode === "text"
-            ? `AI response to: ${prompt || attachedFile?.name}`
-            : "https://via.placeholder.com/300",
+          content:
+            mode === "text"
+              ? `AI response to: ${prompt || attachedFile?.name}`
+              : "https://via.placeholder.com/300",
           timestamp: new Date(),
           isImage: mode === "image"
         }
@@ -49,7 +64,8 @@ const ChatBox = () => {
     }, 2000)
   }
 
-  // ✅ Stop generation function
+
+  
   const stopGeneration = () => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)

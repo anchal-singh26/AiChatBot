@@ -6,13 +6,18 @@ import { assets } from './assets/assets'
 import './assets/prism.css'
 import { useAppContext } from './context/AppContext'
 import Login from './pages/Login'
+import {Toaster} from 'react-hot-toast'
 
 const App = () => {
-  const { user } = useAppContext()
+  const { user, loadingUser  } = useAppContext()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
+  
+
   return (
+
     <>
+    <Toaster/>
       {/* Mobile Menu Button */}
       {!isMenuOpen && (
         <img

@@ -1,4 +1,6 @@
 import React, { useState } from 'react'
+import toast from "react-hot-toast"
+import { useAppContext } from "../context/AppContext"  
 
 const Login = () => {
   const [state, setState] = useState("login");
@@ -6,9 +8,24 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const {axios, setToken}= useAppContext();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // you can handle login logic here later
+    const url = state === "login" ? '/api/user/login' : '/api/user/register'
+
+    try {
+      const {data } =await axios.post(url, {name, email, password})
+      if(data.success){
+        setToken(data.token)
+        localStorage.setItem('token', data.token)
+      } else{
+        toast.error(data.message)
+      }
+      
+    } catch (error) {
+      toast.error(error.message)
+    }
   }
 
   return (
@@ -16,11 +33,29 @@ const Login = () => {
       onSubmit={handleSubmit}
       className="max-w-96 w-full text-center border border-gray-300/60 rounded-2xl px-8 bg-white"
     >
-      <h1 className="text-gray-900 text-3xl mt-10 font-medium">Login</h1>
-      <p className="text-gray-500 text-sm mt-2">Please sign in to continue</p>
+      <h1 className="text-gray-900 text-3xl mt-10 font-medium">
+        {state === "login" ? "Login" : "Sign Up"}
+      </h1>
+      <p className="text-gray-500 text-sm mt-2">
+        {state === "login" ? "Please sign in to continue" : "Create your account"}
+      </p>
+
+      {/* Show Name only in Sign Up */}
+      {state === "register" && (
+        <div className="flex items-center w-full mt-8 bg-white border border-gray-300/80 h-12 rounded-full overflow-hidden pl-6 gap-2">
+          <input
+            type="text"
+            placeholder="Full Name"
+            className="bg-transparent text-gray-500 placeholder-gray-500 outline-none text-sm w-full h-full"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+      )}
 
       {/* Email Field */}
-      <div className="flex items-center w-full mt-10 bg-white border border-gray-300/80 h-12 rounded-full overflow-hidden pl-6 gap-2">
+      <div className="flex items-center w-full mt-8 bg-white border border-gray-300/80 h-12 rounded-full overflow-hidden pl-6 gap-2">
         <svg
           width="16"
           height="11"
@@ -69,24 +104,45 @@ const Login = () => {
         />
       </div>
 
-      <div className="mt-5 text-left text-purple-500">
-        <a className="text-sm" href="#">
-          Forgot password?
-        </a>
-      </div>
+      {state === "login" && (
+        <div className="mt-5 text-left text-purple-500">
+          <a className="text-sm" href="#">
+            Forgot password?
+          </a>
+        </div>
+      )}
 
       <button
         type="submit"
-        className="mt-2 w-full h-11 rounded-full text-white bg-purple-500 hover:opacity-90 transition-opacity"
+        className="mt-4 w-full h-11 rounded-full text-white bg-purple-500 hover:opacity-90 transition-opacity"
       >
-        Login
+        {state === "login" ? "Login" : "Sign Up"}
       </button>
 
       <p className="text-gray-500 text-sm mt-3 mb-11">
-        Don’t have an account?{" "}
-        <a className="text-purple-500" href="#">
-          Sign up
-        </a>
+        {state === "login" ? (
+          <>
+            Don’t have an account?{" "}
+            <button
+              type="button"
+              onClick={() => setState("register")}
+              className="text-purple-500 underline"
+            >
+              Sign up
+            </button>
+          </>
+        ) : (
+          <>
+            Already have an account?{" "}
+            <button
+              type="button"
+              onClick={() => setState("login")}
+              className="text-purple-500 underline"
+            >
+              Login
+            </button>
+          </>
+        )}
       </p>
     </form>
   )
