@@ -128,7 +128,7 @@ const ChatBox = () => {
       )}
 
       {/* Prompt Input Box */}
-      <div className="w-full flex justify-start mb-20">
+      <div className="w-full flex justify-center mb-20">
         <form
           onSubmit={onSubmit}
           className="bg-primary/20 dark:bg-[#583C79]/30 border border-primary dark:border-[#80609F]/30 
